@@ -7,6 +7,13 @@ import 'package:backbone/logging/log.dart';
 import 'package:flutter/foundation.dart';
 import 'package:perfmon_logger/worker.dart';
 
+/*
+    TODO: Import this file conditionally for native/web
+          On the web, replace Isolate with Web Worker
+          Try to compile dart business code to JS 
+          Use the JS result in Web Worker
+*/
+
 /// Log to PrefMon via websocket
 class PerfMonLog extends Log {
   SendPort? sendPort;

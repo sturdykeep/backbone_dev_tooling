@@ -177,7 +177,7 @@ class _StatisticsState extends State<Statistics> {
           } else if (event.name == "realm_renderTree") {
             _renderTimes.add(event.milliseconds!);
           } else {
-            //TODO handle custom sampels
+            //TODO handle custom samples
           }
         } else if (event.eventType == "trace") {
           // Handels all trace calls
