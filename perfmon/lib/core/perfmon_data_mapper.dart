@@ -12,7 +12,7 @@ class PerfmonDataMapper {
       final json = jsonDecode(message);
       return PerfMonEvent.fromJson(json);
     } catch (ex) {
-      debugPrint(message);
+      debugPrint("Unable to read $message as PerfMonEvent");
     }
 
     return null;

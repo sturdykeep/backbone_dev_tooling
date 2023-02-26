@@ -172,27 +172,28 @@ class _StatisticsState extends State<Statistics> {
       } else {
         // parse different categories update view
         if (event.eventType == "addSample") {
+          //TODO handle custom samples
+        } else if (event.eventType == "trace") {
+          //TODO show 99% of update/render time
           if (event.name == "realm_update") {
             _updateTimes.add(event.milliseconds!);
           } else if (event.name == "realm_renderTree") {
             _renderTimes.add(event.milliseconds!);
           } else {
-            //TODO handle custom samples
+            // Handels all trace calls
+            final parent =
+                event.payload?.replaceAll(RegExp('\\(.*?\\)'), '') ?? "";
+            final sysData = _systemData.firstWhere(
+                (sd) =>
+                    sd.column == event.name &&
+                    sd.frame == (event.frame ?? 0) &&
+                    sd.parent == parent, orElse: () {
+              final d = SystemData(event.name, parent, event.frame ?? 0);
+              _systemData.add(d);
+              return d;
+            });
+            sysData.values.add(event.milliseconds!);
           }
-        } else if (event.eventType == "trace") {
-          // Handels all trace calls
-          final parent =
-              event.payload?.replaceAll(RegExp('\\(.*?\\)'), '') ?? "";
-          final sysData = _systemData.firstWhere(
-              (sd) =>
-                  sd.column == event.name &&
-                  sd.frame == (event.frame ?? 0) &&
-                  sd.parent == parent, orElse: () {
-            final d = SystemData(event.name, parent, event.frame ?? 0);
-            _systemData.add(d);
-            return d;
-          });
-          sysData.values.add(event.milliseconds!);
         }
       }
     }
