@@ -1,80 +1,30 @@
-library perfmon_logger;
-
-import 'dart:async';
-import 'dart:isolate';
-import 'package:async/async.dart';
 import 'package:backbone/logging/log.dart';
-import 'package:flutter/foundation.dart';
-import 'package:perfmon_logger/worker.dart';
+import 'package:perfmon_logger/platform/perfmon_logger_stub.dart'
+    if (dart.library.io) 'package:perfmon_logger/platform/perfmon_logger_io.dart'
+    if (dart.library.html) 'package:perfmon_logger/platform/perfmon_logger_web.dart';
 
-/*
-    TODO: Import this file conditionally for native/web
-          On the web, replace Isolate with Web Worker
-          Try to compile dart business code to JS 
-          Use the JS result in Web Worker
-*/
-
-/// Log to PrefMon via websocket
-class PerfMonLog extends Log {
-  SendPort? sendPort;
-
-  PerfMonLog({String host = "ws://localhost:8080"}) {
-    init(host);
-  }
-
-  Future<void> init(String host) async {
-    final p = ReceivePort();
-    await Isolate.spawn(perfMonReport, p.sendPort);
-    final events = StreamQueue<dynamic>(p);
-    sendPort = await events.next;
-    sendPort!.send(host);
-    debugPrint('Logger is ready');
-  }
+class PerfmonLogger extends Log {
+  final PerfMonLogImpl _logger;
+  PerfmonLogger({String host = "ws://localhost:8080"})
+      : _logger = PerfMonLogImpl(host: host);
 
   @override
   void addEvent(String event, {String? payload, int? frame}) {
-    if (sendPort == null) return;
-    sendPort!.send(
-      WorkerEvent.addEvent(
-        event,
-        payload,
-        DateTime.now(),
-        frame: frame,
-      ),
-    );
+    _logger.addEvent(event, payload: payload, frame: frame);
   }
 
   @override
   void addSample(String key, int milliseconds, {int? frame}) {
-    if (sendPort == null) return;
-    sendPort!.send(WorkerEvent.addSample(
-      key,
-      DateTime.now(),
-      milliseconds,
-      frame: frame,
-    ));
+    _logger.addSample(key, milliseconds, frame: frame);
   }
 
   @override
   void endTrace(String trace, {int? frame}) {
-    if (sendPort == null) return;
-    sendPort!.send(
-      WorkerEvent.endTrace(
-        trace,
-        DateTime.now(),
-        frame: frame,
-      ),
-    );
+    _logger.endTrace(trace, frame: frame);
   }
 
   @override
   void startTrace(String trace) {
-    if (sendPort == null) return;
-    sendPort!.send(
-      WorkerEvent.startTrace(
-        trace,
-        DateTime.now(),
-      ),
-    );
+    _logger.startTrace(trace);
   }
 }

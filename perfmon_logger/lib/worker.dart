@@ -143,4 +143,20 @@ class WorkerEvent {
     this.milliseconds,
     this.frame,
   });
+
+  Map<String, dynamic> toJson() {
+    return {
+      "name": name,
+      "creationTime": creationTime,
+      "eventType": eventType,
+      "payload": payload,
+      "milliseconds": milliseconds,
+      "frame": frame,
+    };
+  }
+
+  @override
+  String toString() {
+    return "$eventType:$name,$payload,$creationTime,$milliseconds,$frame";
+  }
 }
